@@ -1,14 +1,29 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import LandingPage from './Pages/LandingPage';
 import Signup from './Pages/Signup';
 import Login from './Pages/Login';
-import StudentForm from './Pages/StudentForm';
-import AutomateTask from './Pages/AutomateTask';
 import Dashboard from './Pages/Dashboard';
 import Resume from './Pages/Resume';
+import axios from 'axios';
+import StudentDetails from './Pages/StudentDetails';
 
 const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  console.log(isLoggedIn);
+  
+  const checkToken = async () => {
+    if(localStorage.getItem('token')){
+      const me = await axios.get('http://localhost:5000/api/auth/me', {headers : {Authorization: `Bearer ${localStorage.getItem('token')}`}});
+      
+      if(me.status === 200){
+        setIsLoggedIn(true);
+      }
+    }
+  }
+  useEffect(() => {
+    checkToken();
+  },[])
   return (
     <Router>
       <div className="bg-black min-h-screen">
@@ -34,24 +49,27 @@ const App = () => {
                 >
                   Login
                 </Link>
-                <Link
+                {isLoggedIn && <Link
                   to="/dashboard"
                   className="text-white hover:text-blue-500 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Dashboard
-                </Link>
+                </Link>}
               </div>
             </div>
           </div>
         </nav>
         <Routes>
+          {
+            isLoggedIn &&( <>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/resume" element={<Resume />} />
+            <Route exact path="/student/:id" element={<StudentDetails />} />
+            </>)
+          }
           <Route path="/" element={<LandingPage />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/students" element={<StudentForm />} />
-          <Route path="/automate-task" element={<AutomateTask />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/resume" element={<Resume />} />
+          <Route path="/login" element={<Login onLogin={()=>setIsLoggedIn(true)}/>} />
         </Routes>
       </div>
     </Router>

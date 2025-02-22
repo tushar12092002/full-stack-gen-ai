@@ -1,12 +1,13 @@
+import axios from 'axios';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
-const Login = () => {
+const Login = ({onLogin}) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+  
 
   const navigate = useNavigate();
 
@@ -18,15 +19,13 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {    
     e.preventDefault();
-
-    // Simulate login validation
-    if (formData.email === 'test@example.com' && formData.password === 'password') {
-      console.log('Login Successful');
-      navigate('/students'); // Redirect to the StudentList page
-    } else {
-      alert('Invalid email or password');
+    const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+    if(response.data.token){
+      localStorage.setItem('token', response.data.token);
+      onLogin();
+      navigate('/dashboard');
     }
   };
 
@@ -36,7 +35,7 @@ const Login = () => {
         <h2 className="text-2xl font-bold mb-6 text-center text-blue-500">Login</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-300">Email:</label>
+            <label htmlFor='email' className="block text-sm font-medium text-gray-300">Email:</label>
             <input
               type="email"
               name="email"
@@ -47,7 +46,7 @@ const Login = () => {
             />
           </div>
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-300">Password:</label>
+            <label htmlFor='password' className="block text-sm font-medium text-gray-300">Password:</label>
             <input
               type="password"
               name="password"

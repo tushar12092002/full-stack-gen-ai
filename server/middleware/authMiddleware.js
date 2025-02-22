@@ -4,19 +4,28 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const protect = (req, res, next) => {
-  let token = req.header('Authorization');
-  if (!token) {
-    return res.status(401).json({ message: 'No token, authorization denied' });
+  let token;
+
+  // Check if there's a token in the Authorization header
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      // Extract the token from the header
+      token = req.headers.authorization.split(' ')[1];
+
+      // Verify the token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Attach the user info to the request object
+      req.user = decoded;
+
+      next();
+    } catch (error) {
+      res.status(401).json({ message: 'Not authorized, token failed' });
+    }
   }
 
-  token = token.split(' ')[1]; // Remove 'Bearer ' prefix
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded.id; // Save user id from token
-    next();
-  } catch (err) {
-    res.status(401).json({ message: 'Invalid token' });
+  if (!token) {
+    res.status(401).json({ message: 'Not authorized, no token' });
   }
 };
 
