@@ -5,8 +5,8 @@ import Signup from './Pages/Signup';
 import Login from './Pages/Login';
 import StudentForm from './Pages/StudentForm';
 import AutomateTask from './Pages/AutomateTask';
+import Dashboard from './Pages/Dashboard';
 import axios from 'axios';
-
 
 const App = () => {
   return (
@@ -34,6 +34,12 @@ const App = () => {
                 >
                   Login
                 </Link>
+                <Link
+                  to="/dashboard"
+                  className="text-white hover:text-blue-500 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Dashboard
+                </Link>
               </div>
             </div>
           </div>
@@ -44,6 +50,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/students" element={<StudentForm />} />
           <Route path="/automate-task" element={<AutomateTask />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </div>
     </Router>
