@@ -30,10 +30,10 @@ const Dashboard = () => {
       alert('Please select a file to upload');
       return;
     }
-
+  
     const formData = new FormData();
     formData.append('resume', selectedFile);
-
+  
     try {
       const response = await axios.post('http://localhost:5000/api/upload-resume', formData, {
         headers: {
@@ -42,6 +42,9 @@ const Dashboard = () => {
       });
       setResumes([...resumes, response.data]);
       alert('Resume uploaded successfully');
+  
+      // Redirect to the Resume page with the uploaded resume ID
+      navigate('/resume', { state: { resumeId: response.data.id } });
     } catch (error) {
       console.error('Error uploading resume:', error);
       alert('Failed to upload resume');
