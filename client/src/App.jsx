@@ -6,7 +6,7 @@ import Login from './Pages/Login';
 import StudentForm from './Pages/StudentForm';
 import AutomateTask from './Pages/AutomateTask';
 import Dashboard from './Pages/Dashboard';
-import axios from 'axios';
+import Resume from './Pages/Resume';
 
 const App = () => {
   return (
@@ -51,6 +51,7 @@ const App = () => {
           <Route path="/students" element={<StudentForm />} />
           <Route path="/automate-task" element={<AutomateTask />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/resume" element={<Resume />} />
         </Routes>
       </div>
     </Router>

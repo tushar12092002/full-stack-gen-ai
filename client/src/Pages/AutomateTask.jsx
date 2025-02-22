@@ -7,7 +7,7 @@ const AutomateTask = () => {
 
   const handleSearch = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/students/search?email=${searchEmail}`);
+      const response = await axios.get(`http://localhost:3000/api/students/search?email=${searchEmail}`);
       setFoundStudent(response.data);
     } catch (error) {
       console.error('Error searching for student:', error);
