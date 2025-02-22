@@ -1,0 +1,125 @@
+const express = require('express');
+const Student = require('../models/Student');
+const protect = require('../middleware/authMiddleware'); 
+const sendEmail = require('../utils/mailer'); 
+const upload = require('../utils/multer');
+
+const router = express.Router();
+
+// CREATE a new student
+router.post('/', protect, upload.single('file'), async (req, res) => {
+  const { name, email } = req.body;
+
+  const file = req.file;  // Multer will store the uploaded file information in req.file
+
+  if (!file) {
+    return res.status(400).json({ message: 'Please upload a file.' });
+  }  
+
+  try {
+    const studentExists = await Student.findOne({ email });
+    if (studentExists) {
+      return res.status(400).json({ message: 'Student with this email already exists' });
+    }
+
+    const newStudent = new Student({
+      name,
+      email,
+    });
+
+    await newStudent.save();
+    res.status(201).json(newStudent);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// READ all students
+router.get('/', protect, async (req, res) => {
+  try {
+    const students = await Student.find();
+    res.json(students);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// READ a single student by ID
+router.get('/:id', protect, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const student = await Student.findById(id);
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+    res.json(student);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// UPDATE a student by ID
+router.put('/:id', protect, async (req, res) => {
+  const { id } = req.params;
+  const { name, email } = req.body;
+
+  try {
+    const student = await Student.findById(id);
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    student.name = name || student.name;
+    student.email = email || student.email;
+
+    await student.save();
+    res.json(student);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// DELETE a student by ID
+router.delete('/:id', protect, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const student = await Student.findById(id);
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    await student.deleteOne();
+    res.json({ message: 'Student deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post('/send-email/:id', async (req, res) => {
+  const { id } = req.params;
+  const { subject, message } = req.body;  // You can customize the email subject and message
+
+  try {
+    const student = await Student.findById(id);
+
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    // Send email using the sendEmail utility
+    const emailSent = await sendEmail(student.email, subject, message);
+
+    // Respond with success if email is sent
+    res.json({
+      message: 'Email sent successfully',
+      info: emailSent,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error sending email', error: error.message });
+  }
+});
+
+
+module.exports = router;

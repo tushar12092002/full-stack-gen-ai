@@ -1,61 +1,29 @@
-const express = require('express')
+const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
+const dotenv = require('dotenv');
+const authRoutes = require('./routes/authRoutes');
+const studentRoutes = require('./routes/studentRoutes');  // Import student routes
+
+dotenv.config();
 
 const app = express();
-const PORT = 3000;
+app.use(express.json());
+app.use(cors());
 
-// Middleware
-app.use(cors()); // Enable CORS
-app.use(express.json()); // Parse JSON request bodies
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
-// Mock database (in-memory array)
-let students = [
-  { id: 1, name: 'John Doe', email: 'john@example.com' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
-];
+// Use the authentication routes
+app.use('/api/auth', authRoutes);
 
-// Routes
-
-// Get all students
-app.get('/api/students', (req, res) => {
-  res.json(students);
-});
-
-// Add a new student
-app.post('/api/students', (req, res) => {
-  const { name, email } = req.body;
-  if (!name || !email) {
-    return res.status(400).json({ error: 'Name and email are required' });
-  }
-
-  const newStudent = {
-    id: students.length + 1,
-    name,
-    email,
-  };
-
-  students.push(newStudent);
-  res.status(201).json(newStudent);
-});
-
-
-// Search for a student by email
-app.get('/api/students/search', (req, res) => {
-  const { email } = req.query;
-  if (!email) {
-    return res.status(400).json({ error: 'Email query parameter is required' });
-  }
-
-  const foundStudent = students.find((student) => student.email === email);
-  if (!foundStudent) {
-    return res.status(404).json({ error: 'Student not found' });
-  }
-
-  res.json(foundStudent);
-});
-
+// Use the student CRUD routes
+app.use('/api/students', studentRoutes);
 
 // Start the server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server running on port http://localhost:${PORT}`);
 });
