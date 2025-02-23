@@ -7,7 +7,6 @@ import Dashboard from './Pages/Dashboard';
 import Resume from './Pages/Resume';
 import axios from 'axios';
 import StudentDetails from './Pages/StudentDetails';
-import UploadResume from './Pages/UploadResume';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -66,7 +65,6 @@ const App = () => {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/resume" element={<Resume />} />
             <Route exact path="/student/:id" element={<StudentDetails />} />
-            <Route path="/upload-resume" element={<UploadResume />} />
             </>)
           }
           <Route path="/" element={<LandingPage />} />
