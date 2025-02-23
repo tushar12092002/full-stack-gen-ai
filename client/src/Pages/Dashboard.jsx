@@ -214,7 +214,6 @@ const Dashboard = () => {
                     <p className="text-lg font-semibold">{resume.name}</p>
                     <Link
                       to={`/student/${resume._id}`}
-                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-500 hover:text-blue-400"
                     >

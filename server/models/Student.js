@@ -9,6 +9,10 @@ const studentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  uid : {
+    type : String,
+    required : true,
+  },
   status: {
     type: String,
   },

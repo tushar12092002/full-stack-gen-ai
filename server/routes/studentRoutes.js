@@ -21,6 +21,7 @@ router.post('/', protect, upload.single('file'), async (req, res) => {
     const newStudent = new Student({
       name,
       email,
+      uid : req.user.userId,
       jd,
       status : "Processing"
     });
@@ -49,7 +50,7 @@ router.post('/', protect, upload.single('file'), async (req, res) => {
 // READ all students
 router.get('/', protect, async (req, res) => {
   try {
-    const students = await Student.find();
+    const students = await Student.find({uid : req.user.userId});
     res.json(students);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -61,7 +62,7 @@ router.get('/:id', protect, async (req, res) => {
   const { id } = req.params;
 
   try {
-    const student = await Student.findById(id);
+    const student = await Student.findById(id, {}, {uid : req.user.userId});
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
@@ -77,7 +78,7 @@ router.put('/:id', protect, async (req, res) => {
   const { name, email } = req.body;
 
   try {
-    const student = await Student.findById(id);
+    const student = await Student.findById(id, {}, {uid : req.user.userId});
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
@@ -97,7 +98,7 @@ router.delete('/:id', protect, async (req, res) => {
   const { id } = req.params;
 
   try {
-    const student = await Student.findById(id);
+    const student = await Student.findById(id, {}, {uid : req.user.userId});
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
@@ -114,7 +115,7 @@ router.post('/send-email/:id', async (req, res) => {
   const { subject, message } = req.body;  // You can customize the email subject and message
 
   try {
-    const student = await Student.findById(id);
+    const student = await Student.findById(id, {}, {uid : req.user.userId});
 
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
@@ -139,7 +140,7 @@ router.post('/evaluate/:id', async (req, res) => {
   const { filePath } = req.body;
 
   try {
-    const student = await Student.findById(id);
+    const student = await Student.findById(id, {}, {uid : req.user.userId});
 
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
