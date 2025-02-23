@@ -3,12 +3,13 @@ const Student = require('../models/Student');
 const protect = require('../middleware/authMiddleware'); 
 const sendEmail = require('../utils/mailer'); 
 const upload = require('../utils/multer');
+const {evaluate} = require('../utils/llm');
 
 const router = express.Router();
 
 // CREATE a new student
 router.post('/', protect, upload.single('file'), async (req, res) => {
-  const { name, email } = req.body;
+  const { name, email, jd } = req.body;
 
   const file = req.file;  // Multer will store the uploaded file information in req.file
 
@@ -17,17 +18,28 @@ router.post('/', protect, upload.single('file'), async (req, res) => {
   }  
 
   try {
-    const studentExists = await Student.findOne({ email });
-    if (studentExists) {
-      return res.status(400).json({ message: 'Student with this email already exists' });
-    }
-
     const newStudent = new Student({
       name,
       email,
+      jd,
+      status : "Processing"
     });
 
     await newStudent.save();
+
+    const filePath = file.path;
+    const responseText = await evaluate(jd, filePath);
+    console.log(responseText);
+    if(!responseText['JD Match'] || !responseText['MissingKeywords']){
+      newStudent.status = 'ATS SCORING FAILED';
+    }
+    else{
+      newStudent.status = 'Evaluated';
+      newStudent.atsScore = responseText['JD Match'];
+      newStudent.profileSummary = responseText['Profile Summary'];
+    }
+    await newStudent.save();
+
     res.status(201).json(newStudent);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -118,6 +130,33 @@ router.post('/send-email/:id', async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Error sending email', error: error.message });
+  }
+});
+
+
+router.post('/evaluate/:id', async (req, res) => {
+  const { id } = req.params;
+  const { filePath } = req.body;
+
+  try {
+    const student = await Student.findById(id);
+
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    // Call the evaluate function from utils/llm.js
+    const responseText = await evaluate(student.jd, filePath);
+
+    // Update the student status
+    student.status = 'Evaluated';
+    student.atsScore = responseText['JD Match'];
+    await student.save();
+
+    // Respond with the evaluation response
+    res.json({ message: 'Evaluation completed', response: student });
+  } catch (error) {
+    res.status(500).json({ message: 'Error evaluating student', error: error.message });
   }
 });
 

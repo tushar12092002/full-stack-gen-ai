@@ -8,8 +8,10 @@ const Dashboard = () => {
   const [modalFormData, setModalFormData] = useState({
     name: "",
     email: "",
+    jd : ""
   });
   const [file, setFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0]; // Get the first selected file
@@ -41,12 +43,13 @@ const Dashboard = () => {
       alert("Please select a file to upload");
       return;
     }
-
+    
+    setIsLoading(true)
     const formData = new FormData();
     formData.append("file", file);
     formData.append("name", modalFormData.name);
-    formData.append("email", modalFormData.email);
-
+    formData.append("email", modalFormData.email); 
+    formData.append("jd", modalFormData.jd); 
     try {
       await axios.post(
         "http://localhost:5000/api/students",
@@ -63,6 +66,10 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error uploading resume:", error);
       alert("Failed to upload resume");
+    }
+    finally{
+      setModal(false)
+      setIsLoading(false)
     }
   };
 
@@ -130,6 +137,19 @@ const Dashboard = () => {
                   }))
                 }
               />
+              <textarea
+                className="bg-white text-black p-2 rounded-md"
+                placeholder="Enter Job Description"
+                type="text"
+                required
+                value={modalFormData.jd}
+                onChange={(e) =>
+                  setModalFormData((prev) => ({
+                    ...prev,
+                    jd: e.target.value,
+                  }))
+                }
+              />
             </div>
             <div className="flex flex-col items-center">
               <div className="flex flex-col items-center p-4">
@@ -163,10 +183,11 @@ const Dashboard = () => {
                   Close
                 </button>
                 <button
+                  disabled={isLoading}
                   type="submit"
                   className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-300 cursor-pointer"
                 >
-                  Upload
+                  {isLoading ? 'Uploading...' : 'Upload'}
                 </button>
               </div>
             </div>
