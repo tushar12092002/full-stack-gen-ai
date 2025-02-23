@@ -4,6 +4,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoutes');
 const studentRoutes = require('./routes/studentRoutes');  // Import student routes
+const resumeRoutes = require('./routes/resumeRoutes'); // Import resume routes
 
 dotenv.config();
 
@@ -21,6 +22,9 @@ app.use('/api/auth', authRoutes);
 
 // Use the student CRUD routes
 app.use('/api/students', studentRoutes);
+
+// Use the resume parsing routes
+app.use('/api', resumeRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 5000;
