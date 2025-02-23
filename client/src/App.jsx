@@ -4,7 +4,6 @@ import LandingPage from './Pages/LandingPage';
 import Signup from './Pages/Signup';
 import Login from './Pages/Login';
 import Dashboard from './Pages/Dashboard';
-import Resume from './Pages/Resume';
 import axios from 'axios';
 import StudentDetails from './Pages/StudentDetails';
 
@@ -63,7 +62,6 @@ const App = () => {
           {
             isLoggedIn &&( <>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/resume" element={<Resume />} />
             <Route exact path="/student/:id" element={<StudentDetails />} />
             </>)
           }
